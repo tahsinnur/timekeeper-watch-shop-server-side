@@ -21,6 +21,7 @@ async function run() {
     const servicesCollection = database.collection('services');
     const purchaseInfoCollection = database.collection('purchaseInfo');
     const usersCollection = database.collection('users');
+    const ratingsCollection = database.collection('ratings');
 
     // GET API for Products
     app.get('/products', async(req, res) => {
@@ -37,6 +38,22 @@ async function run() {
       res.json(product);
     })
 
+    // POST API FOR ADD A NEW PRODUCT
+    app.post('/products', async (req, res) => {
+      const product = req.body;
+      const result = await productsCollection.insertOne(product);
+      res.send(result);
+  });
+
+
+    // DELETE API for Products
+    app.delete('/products/:id', async(req, res) => {
+      const id = req.params.id;
+      const query = {_id: ObjectId(id)};
+      const result = await productsCollection.deleteOne(query);
+      res.json(result);
+  })
+
     // GET API for Services
     app.get('/services', async(req, res) => {
       const cursor = servicesCollection.find({});
@@ -52,14 +69,14 @@ async function run() {
     })
 
     // GET API for single user purchaseInfo
-    app.get('/purchaseInfo', async(req, res) => {
+    app.get('/purchaseInfo/user', async(req, res) => {
       const email = req.query.email;
       
       const query = {email: email};
       
       const cursor = purchaseInfoCollection.find(query);
       const purchaseInfo = await cursor.toArray();
-      res.send(purchaseInfo);
+      res.json(purchaseInfo);
     })
 
     // POST API for purchaseInfo
@@ -69,8 +86,25 @@ async function run() {
 
       const result = await purchaseInfoCollection.insertOne(purchaseInfo);
       console.log(result);
-      res.send(result); 
+      res.json(result); 
     })
+
+    // PUT API for purchaseInfo
+    app.put('/purchaseInfo/:id', async(req, res) => {
+      const id = req.params.id;
+      const query = {_id: ObjectId(id)};
+      const updateDoc = { $set: { status: 'shipped' } };
+      const result = await purchaseInfoCollection.updateOne(query, updateDoc);
+      res.json(result);
+    })
+
+    // DELETE API for purchaseInfo
+    app.delete('/purchaseInfo/:id', async(req, res) => {
+      const id = req.params.id;
+      const query = {_id: ObjectId(id)};
+      const result = await purchaseInfoCollection.deleteOne(query);
+      res.json(result);
+  })
 
     // GET API for users
     app.get('/users/:email', async (req, res) => {
@@ -108,6 +142,20 @@ async function run() {
       const updateDoc = {$set: {role: 'admin'}};
       const result = await usersCollection.updateOne(filter, updateDoc);
       res.json(result);
+    })
+
+    // POST API for rating
+    app.post('/ratings', async(req, res) => {
+      const rating = req.body;
+      const result = await ratingsCollection.insertOne(rating);
+      res.send(result);
+    })
+
+    // GET API for rating
+    app.get('/ratings', async(req, res) => {
+      const cursor = ratingsCollection.find({});
+      const ratings= await cursor.toArray();
+      res.send(ratings);
     })
 
   }
